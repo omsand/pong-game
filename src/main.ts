@@ -79,6 +79,31 @@ function drawPaddle(paddle: {
     paddle.height
   )
 }
+// points
+let playerScore = 0
+let computerScore = 0
+
+function resetBall() {
+  ball.x = canvas.width / 2
+  ball.y = canvas.height / 2
+
+  if (ball.speedX > 0) {
+    ball.speedX = -4
+  } else {
+    ball.speedX = 4
+  }
+
+  ball.speedY = 4
+  console.log('reset ball', ball)
+}
+
+function drawScore() {
+  ctx.fillStyle = 'white'
+  ctx.font = '32px Arial'
+  ctx.fillText(`${playerScore}`, 300, 50)
+  ctx.fillText(`${computerScore}`, 480, 50)
+}
+
 // player movement
 const keys = {
   w: false,
@@ -114,6 +139,21 @@ function updatePlayerPaddle() {
   }
 }
 
+function keepPaddleInBounds(paddle: {
+  x: number
+  y: number
+  width: number
+  height: number
+}) {
+  if (paddle.y < 0) {
+    paddle.y = 0
+  }
+
+  if (paddle.y + paddle.height > canvas.height) {
+    paddle.y = canvas.height - paddle.height
+  }
+}
+
 
 // clear the screen
 function clearScreen() {
@@ -124,7 +164,6 @@ function updateBall() {
   ball.x = ball.x + ball.speedX
   ball.y = ball.y + ball.speedY
 
-
   // bounce off top and bottom walls
   if (
     ball.y + ball.radius >= canvas.height ||
@@ -133,23 +172,68 @@ function updateBall() {
     ball.speedY = ball.speedY * -1
   }
 
-
   // bounce off left and right walls
+  if (ball.x < 0) {
+    computerScore = computerScore + 1
+    resetBall()
+  }
+
+  if (ball.x > canvas.width) {
+    playerScore = playerScore + 1
+    resetBall()
+  }
+}
+
+// ball hits paddles
+function checkPaddleCollision() {
+
+  // player paddle collision
   if (
-    ball.x + ball.radius >= canvas.width ||
-    ball.x - ball.radius <= 0
+    ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
+    ball.y >= playerPaddle.y &&
+    ball.y <= playerPaddle.y + playerPaddle.height
   ) {
     ball.speedX = ball.speedX * -1
+  }
+
+
+  // computer paddle collision
+  if (
+    ball.x + ball.radius >= computerPaddle.x &&
+    ball.y >= computerPaddle.y &&
+    ball.y <= computerPaddle.y + computerPaddle.height
+  ) {
+    ball.speedX = ball.speedX * -1
+  }
+}
+
+// computer movement
+function updateComputerPaddle() {
+  const paddleCenter = computerPaddle.y + computerPaddle.height / 2
+
+  if (paddleCenter < ball.y) {
+    computerPaddle.y = computerPaddle.y + 4
+  }
+
+  if (paddleCenter > ball.y) {
+    computerPaddle.y = computerPaddle.y - 4
   }
 }
 // the game in action
 function gameLoop() {
   clearScreen()
+
   updatePlayerPaddle()
+  updateComputerPaddle()
+  keepPaddleInBounds(playerPaddle)
+  keepPaddleInBounds(computerPaddle)
   updateBall()
+  checkPaddleCollision()
+
   drawBall()
   drawPaddle(playerPaddle)
   drawPaddle(computerPaddle)
+  drawScore()
   requestAnimationFrame(gameLoop)
 }
 gameLoop()
