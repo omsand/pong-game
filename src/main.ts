@@ -28,7 +28,7 @@ if (!ctx) {
 
 
 const context = ctx
-
+// the ball
 const ball = {
   x: 400,
   y: 250,
@@ -52,6 +52,34 @@ function drawBall() {
   context.fillStyle = 'white'
   context.fill()
 }
+// the paddles
+const playerPaddle = {
+  x: 40,
+  y: 200,
+  width: 12,
+  height: 100,
+}
+const computerPaddle = {
+  x: 748,
+  y: 200,
+  width: 12,
+  height: 100,
+}
+function drawPaddle(paddle: {
+  x: number
+  y: number
+  width: number
+  height: number
+}) {
+  ctx.fillStyle = 'white'
+  ctx.fillRect(
+    paddle.x,
+    paddle.y,
+    paddle.width,
+    paddle.height
+  )
+}
+// clear the screen
 function clearScreen() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 }
@@ -78,13 +106,14 @@ function updateBall() {
     ball.speedX = ball.speedX * -1
   }
 }
-
+// the game in action
 function gameLoop() {
   clearScreen()
   updateBall()
   drawBall()
-
+  drawPaddle(playerPaddle)
+  drawPaddle(computerPaddle)
   requestAnimationFrame(gameLoop)
 }
-
 gameLoop()
+
