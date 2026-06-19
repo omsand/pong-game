@@ -79,6 +79,42 @@ function drawPaddle(paddle: {
     paddle.height
   )
 }
+// player movement
+const keys = {
+  w: false,
+  s: false,
+}
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'w') {
+    keys.w = true
+  }
+
+  if (event.key === 's') {
+    keys.s = true
+  }
+})
+
+window.addEventListener('keyup', (event) => {
+  if (event.key === 'w') {
+    keys.w = false
+  }
+
+  if (event.key === 's') {
+    keys.s = false
+  }
+})
+
+function updatePlayerPaddle() {
+  if (keys.w) {
+    playerPaddle.y = playerPaddle.y - 6
+  }
+
+  if (keys.s) {
+    playerPaddle.y = playerPaddle.y + 6
+  }
+}
+
+
 // clear the screen
 function clearScreen() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -109,6 +145,7 @@ function updateBall() {
 // the game in action
 function gameLoop() {
   clearScreen()
+  updatePlayerPaddle()
   updateBall()
   drawBall()
   drawPaddle(playerPaddle)
