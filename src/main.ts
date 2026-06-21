@@ -1,4 +1,5 @@
 import './style.css'
+import type { Paddle } from './type'
 
 const app = document.querySelector<HTMLDivElement>('#app')
 
@@ -65,12 +66,7 @@ const computerPaddle = {
   width: 12,
   height: 100,
 }
-function drawPaddle(paddle: {
-  x: number
-  y: number
-  width: number
-  height: number
-}) {
+function drawPaddle(paddle: Paddle) {
   ctx.fillStyle = 'white'
   ctx.fillRect(
     paddle.x,
@@ -82,6 +78,9 @@ function drawPaddle(paddle: {
 // points
 let playerScore = 0
 let computerScore = 0
+
+let gameOver = false
+const winningScore = 1
 
 function resetBall() {
   ball.x = canvas.width / 2
@@ -103,6 +102,31 @@ function drawScore() {
   ctx.fillText(`${playerScore}`, 300, 50)
   ctx.fillText(`${computerScore}`, 480, 50)
 }
+// GAME OVER :(
+  function drawGameOver() {
+    ctx.fillStyle = 'white'
+    ctx.font = '40px Arial'
+  
+    if (playerScore >= winningScore) {
+      ctx.fillText('You Win!', 310, 220)
+    }
+  
+    if (computerScore >= winningScore) {
+      ctx.fillText('You Lose!', 310, 220)
+    }
+  
+    ctx.font = '20px Arial'
+    ctx.fillText('Press Space to restart', 300, 270)
+  }
+
+  function checkWinner() {
+    if (
+      playerScore >= winningScore ||
+      computerScore >= winningScore
+    ) {
+      gameOver = true
+    }
+  }
 
 // player movement
 const keys = {
@@ -127,15 +151,32 @@ window.addEventListener('keyup', (event) => {
   if (event.key === 's') {
     keys.s = false
   }
+
+  if (event.code === 'Space' && gameOver) {
+    playerScore = 0
+    computerScore = 0
+  
+    gameOver = false
+  
+    resetBall()
+  } 
 })
 
 function updatePlayerPaddle() {
   if (keys.w) {
-    playerPaddle.y = playerPaddle.y - 6
+    playerPaddle.y = playerPaddle.y - 15
   }
 
   if (keys.s) {
-    playerPaddle.y = playerPaddle.y + 6
+    playerPaddle.y = playerPaddle.y + 15
+  }
+}
+// Centre line
+function drawCenterLine() {
+  ctx.fillStyle = 'white'
+
+  for (let y = 0; y < canvas.height; y = y + 30) {
+    ctx.fillRect(canvas.width / 2 - 2, y, 4, 15)
   }
 }
 
@@ -169,7 +210,7 @@ function updateBall() {
     ball.y + ball.radius >= canvas.height ||
     ball.y - ball.radius <= 0
   ) {
-    ball.speedY = ball.speedY * -1
+    ball.speedY = ball.speedY * -1.0
   }
 
   // bounce off left and right walls
@@ -193,7 +234,7 @@ function checkPaddleCollision() {
     ball.y >= playerPaddle.y &&
     ball.y <= playerPaddle.y + playerPaddle.height
   ) {
-    ball.speedX = ball.speedX * -1
+    ball.speedX = ball.speedX * -1.1
   }
 
 
@@ -203,7 +244,7 @@ function checkPaddleCollision() {
     ball.y >= computerPaddle.y &&
     ball.y <= computerPaddle.y + computerPaddle.height
   ) {
-    ball.speedX = ball.speedX * -1
+    ball.speedX = ball.speedX * -1.1
   }
 }
 
@@ -223,17 +264,26 @@ function updateComputerPaddle() {
 function gameLoop() {
   clearScreen()
 
+  if (gameOver) {
+    drawGameOver()
+    requestAnimationFrame(gameLoop)
+    return
+  }
+
   updatePlayerPaddle()
   updateComputerPaddle()
   keepPaddleInBounds(playerPaddle)
   keepPaddleInBounds(computerPaddle)
   updateBall()
   checkPaddleCollision()
+  checkWinner()
 
-  drawBall()
+  drawCenterLine()
   drawPaddle(playerPaddle)
   drawPaddle(computerPaddle)
+  drawBall()
   drawScore()
+
   requestAnimationFrame(gameLoop)
 }
 gameLoop()
