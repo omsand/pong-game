@@ -15,13 +15,13 @@ app.innerHTML = `
   </canvas>
 `
 
-const canvas = document.querySelector<HTMLCanvasElement>('#game')
+const canvas = document.querySelector<HTMLCanvasElement>('#game')!
 
 if (!canvas) {
   throw new Error('Canvas not found')
 }
 
-const ctx = canvas.getContext('2d')
+const ctx = canvas.getContext('2d')!
 
 if (!ctx) {
   throw new Error('Canvas context not found')
